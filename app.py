@@ -4,6 +4,9 @@ import uuid
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
+import threading
+import time
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -13,6 +16,38 @@ login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
 DATABASE_FILE = "database.db"
+
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE_FILE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def cleanup_expired_files():
+    while True:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Delete anonymous user files older than 5 minutes
+        cur.execute("""
+            DELETE FROM code_snippets 
+            WHERE user_id IS NULL 
+            AND created_at < datetime('now', '-5 minutes')
+        """)
+        
+        # Delete authenticated user files older than 10 days
+        cur.execute("""
+            DELETE FROM code_snippets 
+            WHERE user_id IS NOT NULL 
+            AND created_at < datetime('now', '-7 days')
+        """)
+        
+        conn.commit()
+        conn.close()
+        time.sleep(60)  # Run cleanup every minute
+
+# Start cleanup thread
+cleanup_thread = threading.Thread(target=cleanup_expired_files, daemon=True)
+cleanup_thread.start()
 
 class User(UserMixin):
     def __init__(self, id, username):
@@ -30,11 +65,6 @@ def load_user(user_id):
     if row:
         return User(row[0], row[1])
     return None
-
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 @app.route("/")
 def index():
@@ -137,7 +167,10 @@ def editor(file_id):
             if existing_file:
                 cur.execute("UPDATE code_snippets SET code = ? WHERE id = ?", (code, file_id))
             else:
-                cur.execute("INSERT INTO code_snippets (id, code, user_id) VALUES (?, ?, ?)", (file_id, code, user_id))
+                cur.execute("""
+                    INSERT INTO code_snippets (id, code, user_id, created_at) 
+                    VALUES (?, ?, ?, datetime('now'))
+                """, (file_id, code, user_id))
 
             conn.commit()
             conn.close()
