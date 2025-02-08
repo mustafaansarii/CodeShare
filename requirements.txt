@@ -6,3 +6,4 @@ authlib
 python-dotenv
 gunicorn
 requests
+Flask-Mail

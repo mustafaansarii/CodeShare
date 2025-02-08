@@ -11,7 +11,9 @@ import time
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 import os
-
+from flask_mail import Mail, Message
+import random
+import string
 load_dotenv()
 
 app = Flask(__name__)
@@ -23,6 +25,14 @@ login_manager.login_view = "login"
 
 oauth = OAuth(app)
 app.secret_key = os.getenv("SECRET_KEY")
+
+# Configure Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('email')
+app.config['MAIL_PASSWORD'] = os.getenv('app_password')
+mail = Mail(app)
 
 google = oauth.register(
     name='google',
@@ -117,35 +127,83 @@ def user_codes():
 
     return render_template("codes.html", user_files=user_files)
 
+def generate_otp():
+    return ''.join(random.choices(string.digits, k=6))
+
+@app.route("/send-otp", methods=["POST"])
+def send_otp():
+    email = request.form.get("email")
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+    
+    otp = generate_otp()
+    session['registration_otp'] = otp
+    session['registration_email'] = email
+    session['otp_timestamp'] = datetime.utcnow().timestamp()
+    
+    msg = Message(
+        'Your OTP for Registration',
+        sender=os.getenv('email'),
+        recipients=[email]
+    )
+    msg.body = f'Your OTP for registration is: {otp}'
+    
+    try:
+        mail.send(msg)
+        return jsonify({"message": "OTP sent successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to send OTP"}), 500
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    # If the user is already logged in, redirect to the homepage
     if current_user.is_authenticated:
         return redirect(url_for("index"))
 
     if request.method == "POST":
         name = request.form["name"]
-        email = request.form.get("email")
-        password = bcrypt.generate_password_hash(request.form["password"]).decode("utf-8")
-
+        email = request.form["email"]
+        password = request.form["password"]
+        submitted_otp = request.form.get("otp")
+        
+        stored_otp = session.get('registration_otp')
+        stored_email = session.get('registration_email')
+        otp_timestamp = session.get('otp_timestamp')
+        
+        # Check if OTP is valid and not expired (10 minutes validity)
+        current_time = datetime.utcnow().timestamp()
+        if not stored_otp or not otp_timestamp or (current_time - otp_timestamp) > 600:
+            flash("OTP has expired. Please request a new one.", "danger")
+            return redirect(url_for("register"))
+            
+        if email != stored_email:
+            flash("Email doesn't match the one OTP was sent to.", "danger")
+            return redirect(url_for("register"))
+            
+        if submitted_otp != stored_otp:
+            flash("Invalid OTP. Please try again.", "danger")
+            return redirect(url_for("register"))
+            
+        # If OTP verification successful, proceed with registration
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+        
         conn = get_db_connection()
         cur = conn.cursor()
-
-        # Check if email already exists
-        cur.execute("SELECT id FROM users WHERE email = ?", (email,))
-        existing_user = cur.fetchone()
-
-        if existing_user:
-            flash("Email already exists", "danger")
-            conn.close()
-            return redirect(url_for("register"))
-
+        
         try:
             cur.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", 
-                       (name, email, password))
+                       (name, email, hashed_password))
             conn.commit()
-            flash("Account created! Please log in.", "success")
+            
+            # Clear the session variables
+            session.pop('registration_otp', None)
+            session.pop('registration_email', None)
+            session.pop('otp_timestamp', None)
+            
+            flash("Account created successfully! Please log in.", "success")
             return redirect(url_for("login"))
+        except sqlite3.IntegrityError:
+            flash("Email already exists", "danger")
+            return redirect(url_for("register"))
         finally:
             conn.close()
 
