@@ -49,7 +49,7 @@ def init_db():
     cur.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
+            name TEXT NOT NULL,
             email TEXT UNIQUE,
             password TEXT NOT NULL
         )
@@ -85,16 +85,16 @@ cleanup_thread = threading.Thread(target=cleanup_expired_files, daemon=True)
 cleanup_thread.start()
 
 class User(UserMixin):
-    def __init__(self, id, username, email=None):
+    def __init__(self, id, name, email=None):
         self.id = id
-        self.username = username
+        self.name = name
         self.email = email
 
 @login_manager.user_loader
 def load_user(user_id):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id, username, email FROM users WHERE id = ?", (user_id,))
+    cur.execute("SELECT id, name, email FROM users WHERE id = ?", (user_id,))
     row = cur.fetchone()
     conn.close()
 
@@ -124,25 +124,25 @@ def register():
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        username = request.form["username"]
+        name = request.form["name"]
         email = request.form.get("email")
         password = bcrypt.generate_password_hash(request.form["password"]).decode("utf-8")
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Check if the username or email already exists
-        cur.execute("SELECT id FROM users WHERE username = ? OR email = ?", (username, email))
+        # Check if email already exists
+        cur.execute("SELECT id FROM users WHERE email = ?", (email,))
         existing_user = cur.fetchone()
 
         if existing_user:
-            flash("Username or email already exists", "danger")
+            flash("Email already exists", "danger")
             conn.close()
             return redirect(url_for("register"))
 
         try:
-            cur.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", 
-                       (username, email, password))
+            cur.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", 
+                       (name, email, password))
             conn.commit()
             flash("Account created! Please log in.", "success")
             return redirect(url_for("login"))
@@ -158,21 +158,21 @@ def login():
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        username = request.form["username"]
+        email = request.form["email"]
         password = request.form["password"]
 
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id, password, email FROM users WHERE username = ? OR email = ?", 
-                   (username, username))
+        cur.execute("SELECT id, password, name, email FROM users WHERE email = ?", 
+                   (email,))
         user = cur.fetchone()
         conn.close()
 
         if user and bcrypt.check_password_hash(user["password"], password):
-            login_user(User(user["id"], username, user["email"]))
+            login_user(User(user["id"], user["name"], user["email"]))
             return redirect(url_for("index"))
         else:
-            flash("Invalid username/email or password.", "danger")
+            flash("Invalid email or password.", "danger")
 
     return render_template("login.html")
 
@@ -193,22 +193,22 @@ def auth_callback():
     cur = conn.cursor()
     
     # Check if user exists by email
-    cur.execute("SELECT id, username FROM users WHERE email = ?", (email,))
+    cur.execute("SELECT id, name FROM users WHERE email = ?", (email,))
     user = cur.fetchone()
     
     if not user:
         # Create new user if they don't exist
         password = bcrypt.generate_password_hash(str(uuid.uuid4())).decode("utf-8")
-        cur.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", 
+        cur.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", 
                    (name, email, password))
         conn.commit()
-        cur.execute("SELECT id, username FROM users WHERE email = ?", (email,))
+        cur.execute("SELECT id, name FROM users WHERE email = ?", (email,))
         user = cur.fetchone()
     
     conn.close()
     
     # Log in the user
-    login_user(User(user["id"], user["username"], email))
+    login_user(User(user["id"], user["name"], email))
     return redirect(url_for('index'))
 
 @app.route("/logout")

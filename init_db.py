@@ -3,26 +3,25 @@ import sqlite3
 DATABASE_FILE = "database.db"
 
 def create_tables():
-    conn = sqlite3.connect(DATABASE_FILE)
+    conn = sqlite3.connect("database.db", check_same_thread=False)
     cur = conn.cursor()
 
-    # Drop existing tables to start fresh (optional)
-    cur.execute("DROP TABLE IF EXISTS code_snippets")
-    cur.execute("DROP TABLE IF EXISTS users")
+    # Enable WAL mode to prevent database locking
+    cur.execute("PRAGMA journal_mode=WAL;")
 
-    # Create users table first due to foreign key dependency
+    # Create users table
     cur.execute('''
-        CREATE TABLE users (
+        CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
+            password TEXT
         )
     ''')
 
-    # Create code_snippets table with created_at column
+    # Create code_snippets table
     cur.execute('''
-        CREATE TABLE code_snippets (
+        CREATE TABLE IF NOT EXISTS code_snippets (
             id TEXT PRIMARY KEY,
             code TEXT NOT NULL,
             user_id INTEGER,
@@ -34,6 +33,7 @@ def create_tables():
     conn.commit()
     conn.close()
     print("Database initialized successfully!")
+
 
 if __name__ == "__main__":
     create_tables()
