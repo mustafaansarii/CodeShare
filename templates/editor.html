@@ -8,73 +8,117 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.js"></script>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='code-slash.svg') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
+        .navbar {
+            background: rgba(33, 37, 41, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            padding: 1rem 2rem;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff !important;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .navbar-brand:hover {
+            color: #0d6efd !important;
+            transition: color 0.3s ease;
+        }
+
+        .btn {
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .custom-modal-content {
+            background-color: #393939;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            position: absolute;
+            right: 20px;
+            top: 60px;
+            color: #fff;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: rgb(251, 245, 245);
+            cursor: pointer;
+        }
+
+        #editor {
+            flex-grow: 1;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
-
-<style>
- /* Changed class name to avoid Bootstrap conflict */
- .custom-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    background-color: rgba(0, 0, 0, 0.4); /* Overlay effect */
-    z-index: 1;
-}
-
-.custom-modal-content {
-    background-color: #393939;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 300px;
-    position: absolute; /* Position relative to the modal overlay */
-    right: 20px; /* 20px from the right edge */
-    top: 60px; /* 60px from the top */
-    color: #fff;
-}
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: rgb(251, 245, 245);
-    cursor: pointer;
-}
-
-
-</style>
-
 <body>
     <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand me-4" href="/">CodeShare</a>
-            
-            <div class="d-flex flex-grow-1 align-items-center justify-content-end">
-                <!-- Save & Share Form -->
-                <form action="/editor/{{ file_id }}" method="POST" id="codeForm" class="me-2">
-                    <input type="hidden" name="code" id="codeInput">
-                    <button type="submit" class="btn btn-success">Share</button>
-                </form>
-    
-                <!-- Login/Logout Button -->
-                <div class="ms-2">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('create_new_file') }}">Create New File</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <form action="/editor/{{ file_id }}" method="POST" id="codeForm" class="me-2">
+                        <input type="hidden" name="code" id="codeInput">
+                        <button type="submit" class="btn btn-success">Share</button>
+                    </form>
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-danger ms-2">Logout</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="btn btn-success">Login</a>
+                        <a href="{{ url_for('login') }}" class="btn btn-success ms-2">Login</a>
                     {% endif %}
                 </div>
             </div>
         </div>
     </nav>
     
-    <!-- Modal -->
     <div id="myModal" class="custom-modal">
         <div class="custom-modal-content">
             <span class="close">&times;</span>
@@ -83,8 +127,6 @@
             <label for="share-url">Share this URL</label>
             <input type="text" id="share-url" value="{{ request.url }}" readonly>
             <button class="copy-btn">📋</button>
-            <div class="view-only">
-            </div>
         </div>
     </div>
 
@@ -92,60 +134,50 @@
 
     <script>
         var editor;
-    var saveTimeout;  // Variable to store the timeout function
+        var saveTimeout;
 
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs' }});
-    require(["vs/editor/editor.main"], function() {
-        editor = monaco.editor.create(document.getElementById("editor"), {
-            value: `{{ code | safe }}`,
-            theme: "vs-dark",
-            language: "javascript",
-            automaticLayout: true
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs' }});
+        require(["vs/editor/editor.main"], function() {
+            editor = monaco.editor.create(document.getElementById("editor"), {
+                value: `{{ code | safe }}`,
+                theme: "vs-dark",
+                language: "javascript",
+                automaticLayout: true
+            });
+
+            editor.onDidChangeModelContent(function() {
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(function() {
+                    var code = editor.getValue();
+                    fetch("/editor/{{ file_id }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ code: code }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Code saved:", data);
+                    })
+                    .catch(error => {
+                        console.error("Error saving code:", error);
+                    });
+                }, 1000);
+            });
         });
 
-        // Track content change
-        editor.onDidChangeModelContent(function() {
-            // Clear the previous timeout (if any) to reset the timer
-            clearTimeout(saveTimeout);
-
-            // Set a new timeout to save the code after 1 second of no changes
-            saveTimeout = setTimeout(function() {
-                var code = editor.getValue(); // Get the code from the editor
-
-                fetch("/editor/{{ file_id }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ code: code }), // Send the code as JSON
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Code saved:", data);
-                })
-                .catch(error => {
-                    console.error("Error saving code:", error);
-                });
-            }, 1000); // Wait 1 second (1000 ms) after the last change
-        });
-    });
-
-        // Open the modal when the form is submitted
         document.getElementById("codeForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent form submission
-
-            // Show the modal
+            event.preventDefault();
             var modal = document.getElementById("myModal");
             modal.style.display = "block";
         });
 
-        // Close the modal when the user clicks on the close button (x)
         document.querySelector(".close").addEventListener("click", function() {
             var modal = document.getElementById("myModal");
             modal.style.display = "none";
         });
 
-        // Close the modal if the user clicks outside of the modal
         window.onclick = function(event) {
             var modal = document.getElementById("myModal");
             if (event.target == modal) {
@@ -153,24 +185,31 @@
             }
         };
 
-        // Copy the URL when the "Copy" button is clicked
         document.querySelector(".copy-btn").addEventListener("click", function() {
             var urlInput = document.getElementById("share-url");
             urlInput.select();
             document.execCommand("copy");
         });
 
-        // Close modal when clicking outside the content
         window.onclick = function(event) {
             var modal = document.getElementById("myModal");
             var modalContent = document.querySelector(".custom-modal-content");
-            
-            // Check if the click is outside the modal content AND within the modal overlay
             if (event.target === modal && !modalContent.contains(event.target)) {
                 modal.style.display = "none";
             }
         };
-        
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Ensure the navbar toggler works on mobile
+        document.querySelector('.navbar-toggler').addEventListener('click', function() {
+            var navbarNav = document.getElementById('navbarNav');
+            if (navbarNav.classList.contains('show')) {
+                navbarNav.classList.remove('show');
+            } else {
+                navbarNav.classList.add('show');
+            }
+        });
     </script>
 </body>
 </html>

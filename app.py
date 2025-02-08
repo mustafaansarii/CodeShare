@@ -3,6 +3,7 @@ import sqlite3
 import uuid
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -113,13 +114,11 @@ def logout():
     return redirect(url_for("login"))
 
 @app.route("/new")
-@login_required
 def create_new_file():
     unique_id = str(uuid.uuid4())[:8]
     return redirect(url_for("editor", file_id=unique_id))
 
 @app.route("/editor/<file_id>", methods=["GET", "POST"])
-@login_required
 def editor(file_id):
     if request.method == "POST":
         # Handle auto-save (AJAX)
@@ -133,10 +132,12 @@ def editor(file_id):
             cur.execute("SELECT * FROM code_snippets WHERE id = ?", (file_id,))
             existing_file = cur.fetchone()
 
+            user_id = current_user.id if current_user.is_authenticated else None
+
             if existing_file:
                 cur.execute("UPDATE code_snippets SET code = ? WHERE id = ?", (code, file_id))
             else:
-                cur.execute("INSERT INTO code_snippets (id, code, user_id) VALUES (?, ?, ?)", (file_id, code, current_user.id))
+                cur.execute("INSERT INTO code_snippets (id, code, user_id) VALUES (?, ?, ?)", (file_id, code, user_id))
 
             conn.commit()
             conn.close()
