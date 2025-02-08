@@ -1,8 +1,6 @@
 Flask
 Flask-Bcrypt
 Flask-Login
-sqlite3
-uuid
 werkzeug
 authlib
 python-dotenv
