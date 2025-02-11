@@ -136,6 +136,15 @@ def send_otp():
     if not email:
         return jsonify({"error": "Email is required"}), 400
     
+    # Check if email already exists
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM users WHERE email = ?", (email,))
+    if cur.fetchone():
+        conn.close()
+        return jsonify({"error": "Email already exists"}), 400
+    conn.close()
+
     otp = generate_otp()
     session['registration_otp'] = otp
     session['registration_email'] = email
