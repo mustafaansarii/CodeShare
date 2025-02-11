@@ -126,12 +126,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('create_new_file') }}">Create New File</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
-                    </li>
+                   
                 </ul>
                 <div class="d-flex align-items-center">
                     {% if current_user.is_authenticated %}
