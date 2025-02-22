@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Check Socials API Health
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://codeshareapp.onrender.com/)
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://snippetshareapp.onrender.com/)
           if [ "$response" -eq 200 ]; then
             echo "Socials API is up and running!"
           else
