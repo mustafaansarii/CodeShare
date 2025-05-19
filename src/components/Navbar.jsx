@@ -74,7 +74,7 @@ const Navbar = () => {
     <nav className="w-full border-b border-gray-700 shadow-lg">
       <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-between">
         <a href="/" className="text-white text-xl font-bold hover:text-blue-400 transition-colors flex items-center gap-2">
-          <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">SnipLink</span>
+          <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">SnipShare</span>
         </a>
         
         <div className="flex items-center gap-4">
