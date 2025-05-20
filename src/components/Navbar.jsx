@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { isUserLoggedIn } from '../utils/auth';
-import { FaUserCircle, FaPlus, FaFileAlt, FaSignOutAlt } from 'react-icons/fa';
+import { FaUserCircle, FaPlus, FaFileAlt, FaSignOutAlt, FaCode } from 'react-icons/fa';
 import { FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 const Navbar = () => {
@@ -73,8 +73,9 @@ const Navbar = () => {
   return (
     <nav className="w-full border-b border-gray-700 shadow-lg">
       <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-between">
-        <a href="/" className="text-white text-xl font-bold hover:text-blue-400 transition-colors flex items-center gap-2">
-          <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">SnipShare</span>
+        <a href="/" className="text-yellow-300 text-xl font-bold hover:text-yellow-400 transition-colors flex items-center gap-2">
+          <FaCode className="w-6 h-6" />
+          <span>SnipShare</span>
         </a>
         
         <div className="flex items-center gap-4">

@@ -5,12 +5,14 @@ import { isUserLoggedIn } from '../utils/auth';
 import { FcGoogle } from 'react-icons/fc';
 import toast, { Toaster } from 'react-hot-toast';
 import { FaHome } from 'react-icons/fa';
+import { ThreeDots } from 'react-loader-spinner';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,6 +32,7 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoginLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -40,6 +43,8 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoginLoading(false);
     }
   };
 
@@ -97,8 +102,13 @@ const Login = () => {
           <button
             type="submit"
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={loginLoading}
           >
-            Login
+            {loginLoading ? (
+              <ThreeDots color="#FFFFFF" height={20} width={40} />
+            ) : (
+              'Login'
+            )}
           </button>
           <div className="text-center mt-4">
             <p className="text-sm text-gray-300">Not registered yet?</p>
