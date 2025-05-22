@@ -71,9 +71,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full border-b border-gray-700 shadow-lg">
-      <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-between">
-        <a href="/" className="text-yellow-300 text-xl font-bold hover:text-yellow-400 transition-colors flex items-center gap-2">
+    <nav className="w-full backdrop-blur-sm bg-white/5 border-b border-white/10 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="/" className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-600 bg-clip-text text-transparent hover:opacity-90 transition-opacity">
           <FaCode className="w-6 h-6" />
           <span>SnipShare</span>
         </a>
@@ -81,7 +81,7 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           {isLoggedIn ? <button 
               onClick={handleCreateNew}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all hover:scale-105 shadow-md"
+              className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-4 py-2 rounded-lg transition-all hover:opacity-90 transform hover:scale-105 shadow-md"
               title="Create New Document"
             >
               <FaPlus className="w-4 h-4" />
@@ -92,25 +92,25 @@ const Navbar = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleProfileDropdown}
-                className="text-gray-300 hover:text-blue-400 transition-colors focus:outline-none hover:bg-gray-700 p-2 rounded-full"
+                className="text-gray-300 hover:text-pink-500 transition-colors focus:outline-none hover:bg-white/5 p-2 rounded-full"
                 title="Profile"
               >
                 <FaUserCircle className="w-6 h-6" />
               </button>
               
               {showProfileDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl z-10 border border-gray-700 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-48 backdrop-blur-lg bg-white/5 rounded-lg shadow-xl z-10 border border-white/10 overflow-hidden">
                   <div className="py-1">
                     <a 
                       href="/files" 
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-gray-700 w-full transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 w-full transition-colors"
                     >
-                      <FaFileAlt className="w-4 h-4 text-blue-400" />
+                      <FaFileAlt className="w-4 h-4 text-pink-500" />
                       Your Files
                     </a>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-gray-700 w-full transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 w-full transition-colors"
                     >
                       <FaSignOutAlt className="w-4 h-4 text-red-400" />
                       Logout
@@ -123,7 +123,7 @@ const Navbar = () => {
             <div className="flex items-center gap-3">
               <a 
                 href="/login" 
-                className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-1.5 rounded-lg transition-all hover:scale-105 shadow-md"
+                className="flex items-center gap-2 backdrop-blur-sm bg-white/5 border border-white/10 text-gray-300 px-4 py-2 rounded-lg transition-all hover:bg-white/10 hover:border-white/20 transform hover:scale-105"
                 title="Login"
               >
                 <FiLogIn className="w-4 h-4" />
@@ -131,7 +131,7 @@ const Navbar = () => {
               </a>
               <a 
                 href="/signup" 
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-4 py-1.5 rounded-lg transition-all hover:scale-105 shadow-md"
+                className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-4 py-2 rounded-lg transition-all hover:opacity-90 transform hover:scale-105 shadow-md"
                 title="Signup"
               >
                 <FiUserPlus className="w-4 h-4" />

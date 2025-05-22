@@ -43,3 +43,12 @@ body::before {
     transform: scale(1.02);
   }
 }
+
+/* Global background for all pages */
+.min-h-screen {
+  background-color: #0a0a0a;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(30, 30, 60, 0.2) 0%, transparent 30%),
+    radial-gradient(circle at 80% 80%, rgba(60, 30, 30, 0.2) 0%, transparent 30%),
+    linear-gradient(135deg, rgba(15, 15, 30, 0.3) 0%, rgba(30, 15, 15, 0.3) 50%, rgba(15, 30, 15, 0.3) 100%);
+}

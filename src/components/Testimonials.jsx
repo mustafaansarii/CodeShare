@@ -29,16 +29,16 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <div className="py-16 ">
+    <div className="py-16">
       <div className="container mx-auto px-4 max-w-7xl lg:max-w-[1200px]">
-        <h2 className="text-3xl font-semibold text-center mb-8 text-yellow-400">
+        <h2 className="text-3xl font-semibold text-center mb-8 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent animate-gradient-x">
           What Our Users Say
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className="rounded-lg border border-gray-700 p-6"
+              className="rounded-xl backdrop-blur-sm bg-black/20 border border-white/10 p-6 text-gray-200 shadow-lg hover:shadow-yellow-500/20 transition-all duration-300"
             >
               <div className="flex items-center mb-4">
                 <FaUserCircle className="w-12 h-12 rounded-full mr-4 text-gray-500" />
@@ -49,7 +49,10 @@ const Testimonials = () => {
                   </p>
                 </div>
               </div>
-              <p className="text-gray-300 italic leading-relaxed"><FaQuoteLeft className="inline-block mr-1" />{testimonial.quote}</p>
+              <p className="text-gray-300 italic leading-relaxed">
+                <FaQuoteLeft className="inline-block mr-1" />
+                {testimonial.quote}
+              </p>
             </div>
           ))}
         </div>
