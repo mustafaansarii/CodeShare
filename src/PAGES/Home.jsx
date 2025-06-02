@@ -7,6 +7,7 @@ import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import Features from '../components/Fetures';
 import Testimonials from '../components/Testimonials';
+import { nanoid } from 'nanoid';
 
 const StatBox = ({ label, value, icon: Icon, color, subtext }) => (
   <div className="flex-1 min-w-[140px] rounded-lg backdrop-blur-sm bg-white/5 p-5 border border-white/10 hover:border-white/20 transition-all duration-300">
@@ -35,17 +36,27 @@ const Home = () => {
       return;
     }
 
-    const { data } = await supabase
-      .from('documents')
-      .insert([{ 
-        content: '',
-        user_id: user?.id 
-      }])
-      .select()
-      .single();
-    
-    if (data) {
-      navigate(`/editor/${data.id}`);
+    const shortId = nanoid(6);
+
+    try {
+      const { data, error } = await supabase
+        .from('documents')
+        .insert({ 
+          id: shortId,
+          content: '',
+          user_id: user.id 
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      if (data) {
+        navigate(`/editor/${shortId}`);
+      }
+    } catch (error) {
+      console.error('Error creating document:', error);
+      // Handle error (e.g., show toast notification)
     }
   };
 
