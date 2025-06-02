@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient';
 import { isUserLoggedIn } from '../utils/auth';
 import { FaUserCircle, FaPlus, FaFileAlt, FaSignOutAlt, FaCode } from 'react-icons/fa';
 import { FiLogIn, FiUserPlus } from 'react-icons/fi';
+import { nanoid } from 'nanoid';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -46,17 +47,32 @@ const Navbar = () => {
   const handleCreateNew = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     
-    const { data } = await supabase
-      .from('documents')
-      .insert([{ 
-        content: '',
-        user_id: user?.id 
-      }])
-      .select()
-      .single();
-    
-    if (data) {
-      navigate(`/editor/${data.id}`);
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    const shortId = nanoid(6);
+
+    try {
+      const { data, error } = await supabase
+        .from('documents')
+        .insert({ 
+          id: shortId,
+          content: '',
+          user_id: user.id 
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      if (data) {
+        navigate(`/editor/${shortId}`);
+      }
+    } catch (error) {
+      console.error('Error creating document:', error);
+      // Handle error (e.g., show toast notification)
     }
   };
 
@@ -99,7 +115,7 @@ const Navbar = () => {
               </button>
               
               {showProfileDropdown && (
-                <div className="absolute right-0 mt-2 w-48 backdrop-blur-lg bg-white/5 rounded-lg shadow-xl z-10 border border-white/10 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-48 backdrop-blur-lg bg-white/5 rounded-lg shadow-xl z-50 border border-white/10 overflow-hidden">
                   <div className="py-1">
                     <a 
                       href="/files" 

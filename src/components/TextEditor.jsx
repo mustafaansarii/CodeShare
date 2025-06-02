@@ -46,7 +46,7 @@ const TextEditor = () => {
   return (
     <div className="h-screen flex flex-col">
       <Navbar />
-      <div className="flex-1 relative" style={{ height: 'calc(100vh - 64px)' }}>
+      <div className="flex-1 relative z-10" style={{ height: 'calc(100vh - 64px)' }}>
         <Editor
           height="100%"
           width="100%"
