@@ -314,7 +314,7 @@ public class Main {
         </Toolbar>
       </AppBar>
       <div className="flex flex-1 flex-col md:flex-row" style={{ height: 'calc(100vh - 64px)' }}>
-        <div style={{ width: leftWidth, minWidth: '20%' }}>
+        <div className="w-full md:w-auto" style={{ width: leftWidth, minWidth: '20%', height: '100%' }}>
           <Editor
             height="100%"
             width="100%"
@@ -368,20 +368,20 @@ public class Main {
           className="w-1 bg-gray-700 cursor-col-resize hover:bg-blue-500 hidden md:block"
           onMouseDown={handleMouseDown}
         />
-        <div className="flex-1 flex flex-col p-4 bg-gray-950">
-          <div className="flex-1">
+        <div className="flex-1 flex flex-col p-4 bg-gray-950 md:max-w-[50%]">
+          <div className="flex-1 mb-4 md:mb-0">
             <h3 className="text-gray-200 mb-2 text-sm">Input</h3>
             <textarea
               value={input}
               onChange={handleInputChange}
-              className="w-full h-32 p-2 border border-gray-700 text-gray-200 rounded-lg bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full h-24 md:h-32 p-2 border border-gray-700 text-gray-200 rounded-lg bg-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="Enter input here..."
             />
             <p className="text-gray-400 text-xs mt-1">If your code takes input, add it in the above box before running.</p>
           </div>
-          <div className="flex-1 mt-4">
+          <div className="flex-1">
             <h3 className="text-gray-200 mb-2 text-sm">Output</h3>
-            <pre className="w-full h-64 p-2 border border-gray-700 text-gray-200 rounded-lg bg-gray-900 overflow-auto text-sm">
+            <pre className="w-full h-40 md:h-64 p-2 border border-gray-700 text-gray-200 rounded-lg bg-gray-900 overflow-auto text-sm">
               {output}
             </pre>
           </div>
