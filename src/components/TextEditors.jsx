@@ -72,7 +72,7 @@ public class Main {
       return;
     }
     if (!isOwner) {
-      toast.error('You are in read-only mode. Please select a language to edit.');
+      toast.error('You are in read-only mode.');
       return;
     }
     setContent(value);
