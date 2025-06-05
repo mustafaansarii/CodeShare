@@ -249,9 +249,9 @@ public class Main {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
+    <div className="h-screen flex flex-col bg-gray-700">
       <Toaster />
-      <AppBar position="static" sx={{ backgroundColor: '#1F2937', height: '40px' }}>
+      <AppBar position="static" sx={{ backgroundColor: '#000000', height: '40px' }}>
         <Toolbar sx={{ minHeight: '40px' }}>
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
             <Link href="/" style={{ textDecoration: 'none', color: 'white', display: 'flex', marginTop: '-15px', marginRight: '10px', alignItems: 'center' }}>
@@ -263,13 +263,13 @@ public class Main {
               variant="outlined"
               size="small"
               sx={{
-                backgroundColor: '#374151',
+                backgroundColor: '#1A1A1A',
                 color: 'white',
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#4B5563',
+                  borderColor: '#333333',
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#6B7280',
+                  borderColor: '#666666',
                 },
                 height: '24px',
                 fontSize: '0.75rem',
@@ -277,9 +277,9 @@ public class Main {
                 marginTop: '-15px',
               }}
             >
-              <MenuItem value="python" sx={{ fontSize: '0.75rem' }}>Python</MenuItem>
-              <MenuItem value="java" sx={{ fontSize: '0.75rem' }}>Java</MenuItem>
-              <MenuItem value="other" sx={{ fontSize: '0.75rem' }}>Other</MenuItem>
+              <MenuItem value="python" sx={{ fontSize: '0.75rem', color: 'black' }}>Python</MenuItem>
+              <MenuItem value="java" sx={{ fontSize: '0.75rem', color: 'black' }}>Java</MenuItem>
+              <MenuItem value="other" sx={{ fontSize: '0.75rem', color: 'black' }}>Other</MenuItem>
             </Select>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -292,7 +292,7 @@ public class Main {
               sx={{
                 backgroundColor: '#2563EB',
                 '&:hover': { backgroundColor: '#1D4ED8' },
-                '&:disabled': { backgroundColor: '#6B7280' },
+                '&:disabled': { backgroundColor: '#666666' },
                 height: '30px',
                 marginTop: '-20px',
                 marginRight: '10px',
@@ -305,7 +305,7 @@ public class Main {
             <Button
               onClick={handleShareClick}
               color="inherit"
-              sx={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem', marginTop: '-15px', textTransform: 'none' }}
+              sx={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem', marginTop: '-15px', textTransform: 'none', color: 'white' }}
             >
               <Share fontSize="small" sx={{ marginRight: 1 }} />
               Share
@@ -368,7 +368,7 @@ public class Main {
           className="w-1 bg-gray-700 cursor-col-resize hover:bg-blue-500 hidden md:block"
           onMouseDown={handleMouseDown}
         />
-        <div className="flex-1 flex flex-col p-4 bg-black">
+        <div className="flex-1 flex flex-col p-4 bg-gray-950">
           <div className="flex-1">
             <h3 className="text-gray-200 mb-2 text-sm">Input</h3>
             <textarea

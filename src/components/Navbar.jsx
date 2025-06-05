@@ -5,6 +5,7 @@ import { isUserLoggedIn } from '../utils/auth';
 import { FaUserCircle, FaPlus, FaFileAlt, FaSignOutAlt, FaCode } from 'react-icons/fa';
 import { FiLogIn, FiUserPlus } from 'react-icons/fi';
 import { nanoid } from 'nanoid';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -87,17 +88,23 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full backdrop-blur-sm bg-white/5 border-b border-white/10 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <a href="/" className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-600 bg-clip-text text-transparent hover:opacity-90 transition-opacity">
-          <FaCode className="w-6 h-6" />
-          <span>SnipShare</span>
-        </a>
+    <nav className="w-full backdrop-blur-sm py-0.5 bg-white/5 border-b border-white/10 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+        <div className="flex lg:flex-1">
+          <Link to="https://careerhubs.info" className="-m-1 p-1 flex items-center space-x-2">
+            <div className="w-6 h-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-base">C</span>
+            </div>
+            <div className="text-base font-bold text-gray-800 dark:text-white">
+              CodeShare
+            </div>
+          </Link>
+        </div>
         
         <div className="flex items-center gap-4">
           {isLoggedIn ? <button 
               onClick={handleCreateNew}
-              className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-4 py-2 rounded-lg transition-all hover:opacity-90 transform hover:scale-105 shadow-md"
+              className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-3 py-1.5 rounded-lg transition-all hover:opacity-90 transform hover:scale-105 shadow-md"
               title="Create New Document"
             >
               <FaPlus className="w-4 h-4" />
@@ -108,10 +115,10 @@ const Navbar = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleProfileDropdown}
-                className="text-gray-300 hover:text-pink-500 transition-colors focus:outline-none hover:bg-white/5 p-2 rounded-full"
+                className="text-gray-300 hover:text-pink-500 transition-colors focus:outline-none hover:bg-white/5 p-1.5 rounded-full"
                 title="Profile"
               >
-                <FaUserCircle className="w-6 h-6" />
+                <FaUserCircle className="w-5 h-5" />
               </button>
               
               {showProfileDropdown && (
@@ -119,14 +126,14 @@ const Navbar = () => {
                   <div className="py-1">
                     <a 
                       href="/files" 
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 w-full transition-colors"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-white/10 w-full transition-colors"
                     >
                       <FaFileAlt className="w-4 h-4 text-pink-500" />
                       Your Files
                     </a>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 w-full transition-colors"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-white/10 w-full transition-colors"
                     >
                       <FaSignOutAlt className="w-4 h-4 text-red-400" />
                       Logout
@@ -139,7 +146,7 @@ const Navbar = () => {
             <div className="flex items-center gap-3">
               <a 
                 href="/login" 
-                className="flex items-center gap-2 backdrop-blur-sm bg-white/5 border border-white/10 text-gray-300 px-4 py-2 rounded-lg transition-all hover:bg-white/10 hover:border-white/20 transform hover:scale-105"
+                className="flex items-center gap-2 backdrop-blur-sm bg-white/5 border border-white/10 text-gray-300 px-3 py-1.5 rounded-lg transition-all hover:bg-white/10 hover:border-white/20 transform hover:scale-105"
                 title="Login"
               >
                 <FiLogIn className="w-4 h-4" />
@@ -147,7 +154,7 @@ const Navbar = () => {
               </a>
               <a 
                 href="/signup" 
-                className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-4 py-2 rounded-lg transition-all hover:opacity-90 transform hover:scale-105 shadow-md"
+                className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-3 py-1.5 rounded-lg transition-all hover:opacity-90 transform hover:scale-105 shadow-md"
                 title="Signup"
               >
                 <FiUserPlus className="w-4 h-4" />
