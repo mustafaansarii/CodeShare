@@ -37,31 +37,31 @@ const FAQ = () => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-black to-gray-900">
+    <section className="py-12 md:py-20 bg-gradient-to-b from-black to-gray-900">
       <div className="container mx-auto px-4 max-w-4xl">
-        <h2 className="text-4xl font-bold text-center mb-12 text-white">
+        <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12 text-white">
           Frequently Asked Questions
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {faqData.map((item, index) => (
             <div 
               key={item.id} 
-              className="rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 overflow-hidden hover:shadow-pink-500/20 transition-all duration-300"
+              className="rounded-lg md:rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 overflow-hidden hover:shadow-pink-500/20 transition-all duration-300"
             >
               <button
-                className="flex items-center justify-between w-full py-5 px-6 text-left text-white font-semibold hover:bg-white/5 transition-colors duration-200"
+                className="flex items-center justify-between w-full py-3 px-4 md:py-5 md:px-6 text-left text-white font-medium md:font-semibold hover:bg-white/5 transition-colors duration-200"
                 onClick={() => toggleAccordion(index)}
                 aria-expanded={activeIndex === index}
               >
-                <span className="text-lg">{item.question}</span>
+                <span className="text-base md:text-lg">{item.question}</span>
                 {activeIndex === index ? (
-                  <FaChevronUp className="w-5 h-5 text-pink-500" />
+                  <FaChevronUp className="w-4 h-4 md:w-5 md:h-5 text-pink-500" />
                 ) : (
-                  <FaChevronDown className="w-5 h-5 text-pink-500" />
+                  <FaChevronDown className="w-4 h-4 md:w-5 md:h-5 text-pink-500" />
                 )}
               </button>
               <div
-                className={`px-6 pb-5 text-gray-300 leading-relaxed transition-all duration-300 overflow-hidden ${
+                className={`px-4 pb-4 md:px-6 md:pb-5 text-gray-300 text-sm md:text-base leading-relaxed transition-all duration-300 overflow-hidden ${
                   activeIndex === index ? 'block' : 'hidden'
                 }`}
               >
