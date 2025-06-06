@@ -125,7 +125,7 @@ const UserFiles = () => {
                       <div className="p-3 bg-gray-700 rounded-lg">
                         <FaFileAlt className="w-6 h-6 text-blue-400" />
                       </div>
-                      <h2 className="text-lg sm:text-xl font-semibold text-white">Document {file.id.slice(0, 6)}</h2>
+                      <h2 className="text-lg sm:text-xl font-semibold text-white">Document {file.file_name.slice(0, 6)}</h2>
                     </div>
                     <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">
                       Created: {new Date(file.created_at).toLocaleString()}

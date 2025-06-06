@@ -5,8 +5,8 @@ import 'monaco-editor/esm/vs/basic-languages/java/java.contribution.js';
 import 'monaco-editor/min/vs/editor/editor.main.css';
 import Editor from "@monaco-editor/react";
 import config from '../config';
-import { AppBar, Toolbar, Select, MenuItem, Button, Link, Box } from '@mui/material';
-import { Code, ArrowBack, Share } from '@mui/icons-material';
+import { AppBar, Toolbar, Select, MenuItem, Button, Link, Box, Typography } from '@mui/material';
+import { Code, ArrowBack, Share, FilePresent, Edit } from '@mui/icons-material';
 import toast, { Toaster } from 'react-hot-toast';
 import { supabase } from '../supabaseClient';
 
@@ -21,7 +21,10 @@ const TextEditors = () => {
   const [isRunning, setIsRunning] = useState(false);
   const dividerRef = useRef(null);
   const editorRef = useRef(null);
-
+  const [file_name, setFileName] = useState('');
+  const [isEditingFileName, setIsEditingFileName] = useState(false);
+  const [newFileName, setNewFileName] = useState('');
+  
   useEffect(() => {
     const fetchDocument = async () => {
       // Get the current session
@@ -60,6 +63,7 @@ public class Main {
         setContent(contentForLanguage);
         // Check if current user is the owner
         setIsOwner(data.user_id === session?.user?.id);
+        setFileName(data.file_name);
       }
     };
 
@@ -68,7 +72,7 @@ public class Main {
 
   const handleChange = async (value) => {
     if (!language) {
-      toast.error('Please select a language before writing code.');
+      toast.error('You are in read-only mode.');
       return;
     }
     if (!isOwner) {
@@ -81,7 +85,7 @@ public class Main {
         // Fetch the current language_content
         const { data: currentDocument } = await supabase
           .from('documents')
-          .select('language_content')
+          .select('language_content, file_name')
           .eq('id', id)
           .single();
         
@@ -91,10 +95,10 @@ public class Main {
           [language]: value,
         };
 
-        // Save the updated language_content
+        // Save the updated language_content and file_name
         const { error } = await supabase
           .from('documents')
-          .update({ language_content: updatedLanguageContent, language: language })
+          .update({ language_content: updatedLanguageContent, language: language, file_name: id })
           .eq('id', id);
         
         if (error) {
@@ -248,6 +252,34 @@ public class Main {
       });
   };
 
+  const handleFileNameChange = (e) => {
+    setNewFileName(e.target.value);
+  };
+
+  const handleSaveFileName = async () => {
+    if (!isOwner) {
+      toast.error('You are in read-only mode.');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .update({ file_name: newFileName })
+        .eq('id', id);
+
+      if (error) {
+        toast.error('Failed to update file name: ' + error.message);
+      } else {
+        setFileName(newFileName);
+        setIsEditingFileName(false);
+        toast.success('File name updated successfully');
+      }
+    } catch (error) {
+      toast.error('Failed to update file name: ' + error.message);
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gray-700">
       <Toaster />
@@ -282,7 +314,63 @@ public class Main {
               <MenuItem value="other" sx={{ fontSize: '0.75rem', color: 'black' }}>Other</MenuItem>
             </Select>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
+
+          <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: '#1A1A1A',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              marginTop: '-20px',  
+              border: '1px solid #333333',
+              '&:hover .edit-icon': {
+                display: 'inline-block',
+              },
+            }}>
+              <FilePresent fontSize="small" sx={{ color: '#666666', marginRight: '8px' }} />
+              {isEditingFileName ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <input
+                    type="text"
+                    value={newFileName}
+                    onChange={handleFileNameChange}
+                    className="bg-gray-900 text-white p-1 rounded"
+                    style={{ width: '150px' }}
+                  />
+                  <Button
+                    onClick={handleSaveFileName}
+                    size="small"
+                    sx={{ color: 'white', fontSize: '0.75rem' }}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    onClick={() => setIsEditingFileName(false)}
+                    size="small"
+                    sx={{ color: 'white', fontSize: '0.75rem' }}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="caption" sx={{ color: 'white', fontSize: '0.75rem' }}>
+                    File Name: {file_name || id}
+                  </Typography>
+                  <Edit
+                    className="edit-icon"
+                    fontSize="small"
+                    sx={{ color: '#666666', marginLeft: '8px', display: 'none', cursor: 'pointer' }}
+                    onClick={() => {
+                      setNewFileName(file_name || id);
+                      setIsEditingFileName(true);
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+
             <Button
               onClick={handleRunCode}
               disabled={isRunning || !language || language === 'other'}
@@ -295,19 +383,49 @@ public class Main {
                 '&:disabled': { backgroundColor: '#666666' },
                 height: '30px',
                 marginTop: '-20px',
-                marginRight: '10px',
               }}
             >
               {isRunning ? 'Running...' : 'Run'}
             </Button>
+           
           </Box>
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 2, alignItems: 'center' }}>
+            <Button
+              href="/files"
+              variant="text"
+              startIcon={<FilePresent fontSize="small" />}
+              sx={{
+                color: 'white',
+                textTransform: 'none',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                },
+                padding: '6px 12px',
+                borderRadius: '4px',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                marginTop: '-15px',
+              }}
+            >
+              My Files
+            </Button>
             <Button
               onClick={handleShareClick}
-              color="inherit"
-              sx={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem', marginTop: '-15px', textTransform: 'none', color: 'white' }}
+              variant="text"
+              startIcon={<Share fontSize="small" />}
+              sx={{
+                color: 'white',
+                textTransform: 'none',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                },
+                padding: '6px 12px',
+                borderRadius: '4px',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                marginTop: '-15px',
+              }}
             >
-              <Share fontSize="small" sx={{ marginRight: 1 }} />
               Share
             </Button>
           </Box>
