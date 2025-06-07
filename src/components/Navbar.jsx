@@ -95,7 +95,7 @@ const Navbar = () => {
             <div className="w-6 h-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-base">C</span>
             </div>
-            <div className="text-base font-bold text-gray-800 dark:text-white">
+            <div className="text-base font-bold text-white">
               CodeShare
             </div>
           </Link>
