@@ -104,7 +104,7 @@ const Home = () => {
       <Navbar />
 
       {/* ─── HERO ─── */}
-      <section className="relative min-h-[92vh] flex items-center">
+      <section className="relative min-h-[100vh] flex items-center">
         {/* Background grid */}
         <div className="absolute inset-0 opacity-[0.025]"
           style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '60px 60px' }} />

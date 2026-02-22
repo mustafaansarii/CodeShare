@@ -7,7 +7,7 @@ import { nanoid } from 'nanoid';
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn());
+  const [isLoggedIn, setIsLoggedIn] = useState(null); // null = still loading
   const [userEmail, setUserEmail] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobile, setShowMobile] = useState(false);
@@ -17,14 +17,15 @@ const Navbar = () => {
 
   /* ─── Auth state ─── */
   useEffect(() => {
-    const loadUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) setUserEmail(user.email || '');
-    };
-    loadUser();
+    // Resolve current session immediately (handles INITIAL_SESSION / page refresh)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+      setUserEmail(session?.user?.email || '');
+    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setIsLoggedIn(event === 'SIGNED_IN');
+    // Keep in sync on login / logout / token refresh
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
       setUserEmail(session?.user?.email || '');
     });
     return () => subscription?.unsubscribe();
@@ -150,7 +151,7 @@ const Navbar = () => {
 
           {/* Right side */}
           <div className="flex items-center gap-2.5">
-            {isLoggedIn ? (
+            {isLoggedIn === null ? null /* still loading — render nothing to avoid flicker */ : isLoggedIn ? (
               <>
                 {/* New File button */}
                 <button
