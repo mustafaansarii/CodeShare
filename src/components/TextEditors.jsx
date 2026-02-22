@@ -29,7 +29,10 @@ const TextEditors = () => {
   const [isEditingFileName, setIsEditingFileName] = useState(false);
   const [newFileName, setNewFileName] = useState('');
   const lastSavedContentRef = useRef(null);
+  const languageContentRef = useRef({});  // always up-to-date, no DB fetch needed
+  const saveTimerRef = useRef(null);       // debounce timer
   const [showIOPanel, setShowIOPanel] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Share popover state
   const [shareAnchorEl, setShareAnchorEl] = useState(null);
@@ -75,6 +78,8 @@ public class Main {
         }
 
         setContent(contentForLanguage);
+        languageContentRef.current = data.language_content || {};
+        lastSavedContentRef.current = contentForLanguage;
 
         const ownerStatus = data.user_id === session?.user?.id;
         setIsOwner(ownerStatus);
@@ -126,7 +131,7 @@ public class Main {
     };
   }, [id]);
 
-  const handleChange = async (value) => {
+  const handleChange = (value) => {
     if (!language) {
       toast.error('Please select a language first.');
       return;
@@ -135,33 +140,36 @@ public class Main {
       toast.error('You are in read-only mode.');
       return;
     }
+
+    // Update UI immediately
     setContent(value);
-    try {
-      const { data: currentDocument } = await supabase
-        .from('documents')
-        .select('language_content, file_name')
-        .eq('id', id)
-        .single();
 
-      const updatedLanguageContent = {
-        ...(currentDocument.language_content || {}),
-        [language]: value,
-      };
+    // Keep the in-memory cache in sync so saves always use the latest value
+    languageContentRef.current = {
+      ...languageContentRef.current,
+      [language]: value,
+    };
 
+    // Debounce: clear any pending save and schedule a new one
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const snapshot = { ...languageContentRef.current };
       lastSavedContentRef.current = value;
-
-      const { error } = await supabase
-        .from('documents')
-        .update({ language_content: updatedLanguageContent, language: language, file_name: id })
-        .eq('id', id);
-
-      if (error) {
-        toast.error('Failed to save content: ' + error.message);
+      setIsSaving(true);
+      try {
+        const { error } = await supabase
+          .from('documents')
+          .update({ language_content: snapshot, language })
+          .eq('id', id);
+        if (error) toast.error('Save failed: ' + error.message);
+      } catch (e) {
+        toast.error('Save failed: ' + e.message);
+      } finally {
+        setIsSaving(false);
       }
-    } catch (error) {
-      toast.error('Failed to save content: ' + error.message);
-    }
+    }, 300); // wait 800ms after last keystroke before writing to DB
   };
+
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
