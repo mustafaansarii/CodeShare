@@ -1,73 +1,70 @@
-import { FaQuoteLeft } from 'react-icons/fa';
-
 const testimonials = [
   {
-    id: 1,
-    name: "John Doe",
-    title: "Software Engineer",
-    company: "Tech Innovations Inc.",
-    quote:
-      "CodeShare has revolutionized the way we collaborate on code. Real-time sharing and secure snippets have boosted our productivity significantly.",
-    image: "https://randomuser.me/api/portraits/men/1.jpg"
+    name: 'Priya Sharma',
+    title: 'Senior Engineer',
+    company: 'Infosys',
+    avatar: 'PS',
+    color: 'from-blue-500 to-purple-500',
+    quote: 'CodeShare made it effortless to share code snippets during interviews and pair sessions. The real-time sync is incredibly smooth.',
   },
   {
-    id: 2,
-    name: "Alice Smith",
-    title: "Web Developer",
-    company: "Web Solutions Ltd.",
-    quote:
-      "The easy code sharing feature is a game-changer. I can quickly share code with my team and get feedback instantly. Highly recommended!",
-    image: "https://randomuser.me/api/portraits/women/1.jpg"
+    name: 'Alex Chen',
+    title: 'Full Stack Developer',
+    company: 'Startup Labs',
+    avatar: 'AC',
+    color: 'from-pink-500 to-orange-500',
+    quote: 'I replaced our old pastebin setup entirely. The Monaco editor, instant run, and link sharing — everything just works perfectly.',
   },
   {
-    id: 3,
-    name: "Bob Johnson",
-    title: "Data Scientist",
-    company: "Data Insights Corp.",
-    quote:
-      "CodeShare's private and secure environment ensures our sensitive code remains protected. It's a must-have tool for any data science team.",
-    image: "https://randomuser.me/api/portraits/men/2.jpg"
+    name: 'Rahul Mehta',
+    title: 'CS Student',
+    company: 'IIT Bombay',
+    avatar: 'RM',
+    color: 'from-teal-500 to-green-500',
+    quote: 'We use this for competitive programming practice with friends. The live collaboration feature is a game-changer for group study.',
   },
 ];
 
-const Testimonials = () => {
-  return (
-    <section className="py-12 md:py-20 bg-gradient-to-b from-black to-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 text-white">
-          What Our Users Say
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-          {testimonials.map((testimonial) => (
-            <div
-              key={testimonial.id}
-              className="rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 p-4 sm:p-6 text-gray-200 shadow-lg hover:shadow-pink-500/20 transition-all duration-300"
-            >
-              <div className="flex items-center mb-3 sm:mb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="ml-3 sm:ml-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-white">{testimonial.name}</h3>
-                  <p className="text-gray-400 text-xs sm:text-sm">
-                    {testimonial.title}, {testimonial.company}
-                  </p>
-                </div>
-              </div>
-              <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                <FaQuoteLeft className="inline-block mr-2 text-pink-500" />
-                {testimonial.quote}
-              </p>
-            </div>
-          ))}
+const Testimonials = () => (
+  <section className="py-28 bg-[#0c0c14]">
+    <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <div className="text-center mb-16">
+        <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-sm text-gray-400 mb-6">
+          Loved by developers
         </div>
+        <h2 className="text-4xl lg:text-5xl font-bold text-white">
+          What our users say
+        </h2>
       </div>
-    </section>
-  );
-};
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {testimonials.map((t) => (
+          <div
+            key={t.name}
+            className="bg-white/[0.03] border border-white/8 rounded-2xl p-7 hover:bg-white/[0.05] hover:-translate-y-1 transition-all duration-300"
+            style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+          >
+            {/* Quote */}
+            <svg className="w-8 h-8 text-blue-500/40 mb-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+            </svg>
+            <p className="text-gray-300 text-sm leading-relaxed mb-6">"{t.quote}"</p>
+
+            {/* Author */}
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
+                {t.avatar}
+              </div>
+              <div>
+                <div className="text-white text-sm font-semibold">{t.name}</div>
+                <div className="text-gray-500 text-xs">{t.title} · {t.company}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 export default Testimonials;

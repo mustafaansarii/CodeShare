@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { isUserLoggedIn } from '../utils/auth';
 import { FcGoogle } from 'react-icons/fc';
 import toast, { Toaster } from 'react-hot-toast';
-import { FaHome } from 'react-icons/fa';
 import { ThreeDots } from 'react-loader-spinner';
 
 const Login = () => {
@@ -17,27 +16,25 @@ const Login = () => {
   useEffect(() => {
     const checkAuth = async () => {
       setLoading(true);
-      if (isUserLoggedIn()) {
-        navigate('/');
-      }
+      if (isUserLoggedIn()) navigate('/');
       setLoading(false);
     };
-
     checkAuth();
   }, [navigate]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+        <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast.success('Logged in successfully!');
       navigate('/');
@@ -50,96 +47,106 @@ const Login = () => {
 
   const handleOAuthLogin = async (provider) => {
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: provider,
-      options: {
-        redirectTo: window.location.origin
-      }
+      provider,
+      options: { redirectTo: window.location.origin }
     });
-
-    if (error) {
-      toast.error(error.message);
-    }
+    if (error) toast.error(error.message);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Toaster position="top-center" reverseOrder={false} />
-      <div className="absolute top-4 left-4 flex items-center">
-        <Link to="/" className="text-blue-400 hover:text-blue-300 flex items-center">
-          <FaHome className="mr-1" />
-          Home
-        </Link>
-        <span className="mx-2 text-gray-300">/</span>
-        <span className="text-gray-200">Login</span>
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-4 relative overflow-hidden">
+      <Toaster position="top-center" />
+
+      {/* Background glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-3xl" />
       </div>
-      <div className="p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center mb-8 text-white">Login</h2>
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-200">Email</label>
-            <input
-              type="email"
-              id="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
-              required
-            />
+
+      {/* Back home */}
+      <Link
+        to="/"
+        className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to home
+      </Link>
+
+      {/* Card */}
+      <div className="relative z-10 w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2.5 mb-8">
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-200">Password</label>
-            <input
-              type="password"
-              id="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            disabled={loginLoading}
-          >
-            {loginLoading ? (
-              <ThreeDots color="#FFFFFF" height={20} width={40} />
-            ) : (
-              'Login'
-            )}
-          </button>
-          <div className="text-center mt-4">
-            <p className="text-sm text-gray-300">Not registered yet?</p>
-            <button
-              onClick={() => navigate('/signup')}
-              className="mt-2 w-full flex justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-white bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Create Account
-            </button>
-          </div>
-        </form>
-        
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600"></div>
+          <span className="text-white font-bold text-lg">CodeShare</span>
+        </div>
+
+        <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-8 shadow-2xl shadow-black/40 backdrop-blur-sm">
+          <h2 className="text-xl font-semibold text-white mb-1 text-center">Welcome back</h2>
+          <p className="text-sm text-gray-500 text-center mb-7">Sign in to your account</p>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
+              <input
+                type="email"
+                id="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.06] transition-colors"
+              />
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-gray-300">Or continue with</span>
+
+            <div>
+              <label htmlFor="password" className="block text-xs font-medium text-gray-400 mb-1.5">Password</label>
+              <input
+                type="password"
+                id="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.06] transition-colors"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loginLoading}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-all shadow-lg shadow-blue-600/25 hover:shadow-blue-500/30 mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loginLoading ? <ThreeDots color="#fff" height={18} width={36} /> : 'Sign in'}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/[0.06]" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="px-3 text-xs text-gray-600 bg-[#0f0f16]">or continue with</span>
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-3">
-            <button
-              onClick={() => handleOAuthLogin('google')}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-white bg-gray-700 hover:bg-gray-600 items-center gap-2"
-            >
-              <FcGoogle className="w-5 h-5" />
-              <span>Continue with Google</span>
-            </button>
-          </div>
+          <button
+            onClick={() => handleOAuthLogin('google')}
+            className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.08] text-sm text-gray-300 hover:text-white font-medium transition-all"
+          >
+            <FcGoogle className="w-4 h-4" />
+            Continue with Google
+          </button>
+
+          <p className="text-xs text-gray-600 text-center mt-6">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-blue-400 hover:text-blue-300 transition-colors">Create one</Link>
+          </p>
         </div>
       </div>
     </div>
