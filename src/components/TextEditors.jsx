@@ -24,24 +24,22 @@ const TextEditors = () => {
   const [file_name, setFileName] = useState('');
   const [isEditingFileName, setIsEditingFileName] = useState(false);
   const [newFileName, setNewFileName] = useState('');
-  
+  const lastSavedContentRef = useRef(null);
+
   useEffect(() => {
     const fetchDocument = async () => {
-      // Get the current session
       const { data: { session } } = await supabase.auth.getSession();
-      
-      // Fetch the document
+
       const { data, error } = await supabase
         .from('documents')
         .select('*')
         .eq('id', id)
         .single();
-      
+
       if (data) {
-        const selectedLanguage = data.language || 'python'; // Default to 'python' if no language is set
+        const selectedLanguage = data.language || 'python';
         setLanguage(selectedLanguage);
 
-        // If no content exists for the selected language, set hardcoded default code
         let contentForLanguage = data.language_content?.[selectedLanguage];
         if (!contentForLanguage) {
           if (selectedLanguage === 'java') {
@@ -61,13 +59,42 @@ public class Main {
         }
 
         setContent(contentForLanguage);
-        // Check if current user is the owner
         setIsOwner(data.user_id === session?.user?.id);
         setFileName(data.file_name);
       }
     };
 
     fetchDocument();
+  }, [id]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`document-${id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "documents",
+          filter: `id=eq.${id}`,
+        },
+        (payload) => {
+          if (!payload.new.language_content) return;
+
+          const lang = payload.new.language;
+          const incomingContent = payload.new.language_content?.[lang];
+
+          if (incomingContent === lastSavedContentRef.current) return;
+
+          if (lang) setLanguage(lang);
+          if (incomingContent !== undefined) setContent(incomingContent);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [id]);
 
   const handleChange = async (value) => {
@@ -82,25 +109,27 @@ public class Main {
     setContent(value);
     if (isOwner) {
       try {
-        // Fetch the current language_content
         const { data: currentDocument } = await supabase
           .from('documents')
           .select('language_content, file_name')
           .eq('id', id)
           .single();
-        
+
         // Update the language_content for the current language
         const updatedLanguageContent = {
           ...(currentDocument.language_content || {}),
           [language]: value,
         };
 
+        // Track what we're saving so we can ignore our own realtime echo
+        lastSavedContentRef.current = value;
+
         // Save the updated language_content and file_name
         const { error } = await supabase
           .from('documents')
           .update({ language_content: updatedLanguageContent, language: language, file_name: id })
           .eq('id', id);
-        
+
         if (error) {
           toast.error('Failed to save content: ' + error.message);
         }
@@ -228,7 +257,7 @@ public class Main {
 
   const handleEditorDidMount = (editor) => {
     editorRef.current = editor;
-    
+
     const domNode = editor.getDomNode();
     if (domNode) {
       domNode.addEventListener('keydown', (e) => {
@@ -316,13 +345,13 @@ public class Main {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
 
-          <Box sx={{
+            <Box sx={{
               display: 'flex',
               alignItems: 'center',
               backgroundColor: '#1A1A1A',
               borderRadius: '4px',
               padding: '4px 8px',
-              marginTop: '-20px',  
+              marginTop: '-20px',
               border: '1px solid #333333',
               '&:hover .edit-icon': {
                 display: 'inline-block',
@@ -387,7 +416,7 @@ public class Main {
             >
               {isRunning ? 'Running...' : 'Run'}
             </Button>
-           
+
           </Box>
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 2, alignItems: 'center' }}>
             <Button
@@ -464,7 +493,7 @@ public class Main {
               showUnused: false,
               renderValidationDecorations: "off",
               suggest: {
-                enabled: true,  
+                enabled: true,
                 showWords: true,
                 showSnippets: true,
                 showFiles: true,
@@ -474,9 +503,9 @@ public class Main {
                 showStructs: true,
                 showInterfaces: true
               },
-              quickSuggestions: true, 
+              quickSuggestions: true,
               parameterHints: {
-                enabled: true  
+                enabled: true
               }
             }}
           />
