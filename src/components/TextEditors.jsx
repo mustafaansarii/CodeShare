@@ -136,10 +136,6 @@ public class Main {
       toast.error('Please select a language first.');
       return;
     }
-    if (!canEdit) {
-      toast.error('You are in read-only mode.');
-      return;
-    }
 
     // Update UI immediately
     setContent(value);
@@ -671,7 +667,7 @@ public class Main {
             width="100%"
             language={language || ''}
             value={content}
-            onChange={handleChange}
+            onChange={canEdit ? handleChange : undefined}
             theme="vs-dark"
             onMount={handleEditorDidMount}
             options={{
