@@ -72,6 +72,21 @@ public class Main {
 `;
           } else if (selectedLanguage === 'python') {
             contentForLanguage = 'print("hello world")';
+          } else if (selectedLanguage === 'c') {
+            contentForLanguage = `#include <stdio.h>
+int main() {
+    printf("Hello from C\\n");
+    return 0;
+}`;
+          } else if (selectedLanguage === 'cpp') {
+            contentForLanguage = `#include <iostream>
+using namespace std;
+int main() {
+    cout << "Hello from C++" << endl;
+    return 0;
+}`;
+          } else if (selectedLanguage === 'javascript') {
+            contentForLanguage = 'console.log("Hello from JavaScript");';
           } else if (selectedLanguage === 'other') {
             contentForLanguage = '';
           }
@@ -195,6 +210,21 @@ public class Main {
 `;
       } else if (selectedLanguage === 'python') {
         contentForLanguage = 'print("hello world")';
+      } else if (selectedLanguage === 'c') {
+        contentForLanguage = `#include <stdio.h>
+int main() {
+    printf("Hello from C\\n");
+    return 0;
+}`;
+      } else if (selectedLanguage === 'cpp') {
+        contentForLanguage = `#include <iostream>
+using namespace std;
+int main() {
+    cout << "Hello from C++" << endl;
+    return 0;
+}`;
+      } else if (selectedLanguage === 'javascript') {
+        contentForLanguage = 'console.log("Hello from JavaScript");';
       } else if (selectedLanguage === 'other') {
         contentForLanguage = '';
       }
@@ -238,41 +268,56 @@ public class Main {
   const handleRunCode = async () => {
     setIsRunning(true);
     try {
-      const apiEndpoint = language === 'java' ? config.javaApi : language === 'python' ? config.pythonApi : null;
-      if (!apiEndpoint) {
-        setOutput("Language not supported");
+      const supportedRunLanguages = ['python', 'java', 'c', 'cpp', 'javascript'];
+      if (!supportedRunLanguages.includes(language)) {
+        setOutput("Language not supported for execution");
         return;
       }
-      const response = await fetch(apiEndpoint, {
+      const response = await fetch(config.compilerRunUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          language,
           code: content,
-          input: input
-        })
+          input,
+          timeLimit: 15000,
+          memoryLimit: 256,
+        }),
       });
       const data = await response.json();
-      if (data.error) {
-        setOutput(data.error);
-      } else {
-        setOutput(
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <span className="text-blue-400">Time:</span>
-              <span>{data.time}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-blue-400">Memory:</span>
-              <span>{data.memory}</span>
-            </div>
-            <div className="mt-4">
-              {data.output}
-            </div>
-          </div>
-        );
+
+      const isSuccess = data.status === 'OK' && (data.exitCode === 0 || data.exitCode == null);
+      if (!isSuccess) {
+        const errMsg = data.stderr?.trim() || data.error || `Execution failed (exit code: ${data.exitCode ?? 'non-zero'})`;
+        setOutput(errMsg);
+        return;
       }
+
+      const timeStr = data.executionTimeMs != null ? `${data.executionTimeMs} ms` : '—';
+      const memoryStr = data.memoryUsed != null ? `${data.memoryUsed} MB` : '—';
+      const out = (data.stdout ?? '').trimEnd();
+      const err = (data.stderr ?? '').trim();
+
+      setOutput(
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-blue-400">Time:</span>
+            <span>{timeStr}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-blue-400">Memory:</span>
+            <span>{memoryStr}</span>
+          </div>
+          {(err || out) && (
+            <div className="mt-4">
+              {err && <div className="text-red-400/90 whitespace-pre-wrap mb-2">{err}</div>}
+              {out && <div className="whitespace-pre-wrap">{out}</div>}
+            </div>
+          )}
+        </div>
+      );
     } catch (error) {
       setOutput('Error: ' + error.message);
     } finally {
@@ -384,6 +429,9 @@ public class Main {
   const LANG_COLORS = {
     python: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
     java: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+    c: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+    cpp: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+    javascript: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
     other: 'text-gray-400 bg-gray-500/10 border-gray-500/20',
   };
 
@@ -521,39 +569,120 @@ public class Main {
       </Popover>
 
       {/* ─── Editor top bar ─── */}
-      <header className="flex items-center h-11 px-3 gap-2 bg-[#161616] border-b border-white/[0.06] flex-shrink-0">
+      <header className="flex items-center h-12 px-4 gap-3 bg-[#141414] border-b border-white/[0.07] flex-shrink-0 shadow-[0_1px_0_0_rgba(0,0,0,0.3)]">
 
         {/* Back */}
         <a
           href="/"
           title="Go home"
-          className="flex items-center justify-center w-7 h-7 rounded-md text-gray-500 hover:text-white hover:bg-white/8 transition-colors flex-shrink-0"
+          className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.08] transition-all duration-200 flex-shrink-0"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </a>
 
-        <div className="w-px h-4 bg-white/8 flex-shrink-0" />
+        <div className="w-px h-5 bg-white/[0.08] rounded-full flex-shrink-0" />
 
         {/* Language selector */}
-        <div className="relative flex-shrink-0">
-          <select
-            value={language || ''}
-            onChange={handleLanguageChange}
-            className={`appearance-none text-xs font-medium px-2.5 py-1 pr-6 rounded-md border cursor-pointer transition-colors focus:outline-none ${LANG_COLORS[language] || LANG_COLORS.other} bg-opacity-80`}
-            style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
-          >
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="other">Other</option>
-          </select>
-          <svg className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
+        <Select
+          value={language || 'python'}
+          onChange={handleLanguageChange}
+          size="small"
+          displayEmpty
+          variant="outlined"
+          IconComponent={(props) => (
+            <svg
+              {...props}
+              className="w-4 h-4 pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              style={{ transform: props.style?.transform, color: 'rgba(255,255,255,0.5)' }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          )}
+          sx={{
+            width: 120,
+            height: 32,
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            color: 'rgba(255,255,255,0.95)',
+            backgroundColor: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: '8px',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+            '& fieldset': { display: 'none' },
+            '& .MuiSelect-select': {
+              py: 1,
+              pl: 1.5,
+              pr: 2,
+              boxSizing: 'border-box',
+            },
+            '& .MuiSelect-icon': {
+              right: 10,
+              width: 18,
+              height: 18,
+            },
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.09)',
+              borderColor: 'rgba(255,255,255,0.18)',
+            },
+            '&.Mui-focused': {
+              borderColor: 'rgba(59,130,246,0.6)',
+              boxShadow: '0 0 0 2px rgba(59,130,246,0.2)',
+              '&:hover': { borderColor: 'rgba(59,130,246,0.6)' },
+            },
+          }}
+          MenuProps={{
+            disableScrollLock: true,
+            anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+            transformOrigin: { vertical: 'top', horizontal: 'left' },
+            PaperProps: {
+              sx: {
+                mt: 1.25,
+                minWidth: 120,
+                maxHeight: 320,
+                bgcolor: '#1c1c1e',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '8px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+                overflow: 'hidden',
+              },
+            },
+            MenuListProps: {
+              sx: {
+                py: 0.5,
+                '& .MuiMenuItem-root': {
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  minHeight: 36,
+                  py: 0,
+                  px: 1.5,
+                  color: 'rgba(255,255,255,0.9)',
+                  borderRadius: '4px',
+                  mx: 0.5,
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' },
+                  '&.Mui-selected': {
+                    bgcolor: 'rgba(59,130,246,0.22)',
+                    color: '#93c5fd',
+                    '&:hover': { bgcolor: 'rgba(59,130,246,0.3)' },
+                  },
+                },
+              },
+            },
+          }}
+        >
+          <MenuItem value="python">Python</MenuItem>
+          <MenuItem value="java">Java</MenuItem>
+          <MenuItem value="c">C</MenuItem>
+          <MenuItem value="cpp">C++</MenuItem>
+          <MenuItem value="javascript">JavaScript</MenuItem>
+          <MenuItem value="other">Other</MenuItem>
+        </Select>
 
-        <div className="w-px h-4 bg-white/8 flex-shrink-0" />
+        <div className="w-px h-5 bg-white/[0.08] rounded-full flex-shrink-0" />
 
         {/* File name */}
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -592,7 +721,7 @@ public class Main {
 
         {/* Read-only badge */}
         {!canEdit && (
-          <span className="text-xs text-yellow-500 bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-full flex-shrink-0">
+          <span className="text-xs font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg flex-shrink-0">
             Read-only
           </span>
         )}
@@ -601,9 +730,9 @@ public class Main {
         <button
           onClick={handleRunCode}
           disabled={runDisabled}
-          className={`flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-md transition-all flex-shrink-0 ${runDisabled
-            ? 'bg-white/4 text-gray-600 cursor-not-allowed'
-            : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20'
+          className={`flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg transition-all duration-200 flex-shrink-0 ${runDisabled
+            ? 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/10'
+            : 'bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/30 shadow-md shadow-emerald-900/30 hover:shadow-lg hover:shadow-emerald-900/40'
             }`}
         >
           {isRunning ? (
@@ -624,12 +753,12 @@ public class Main {
           )}
         </button>
 
-        <div className="w-px h-4 bg-white/8 flex-shrink-0" />
+        <div className="w-px h-5 bg-white/[0.08] rounded-full flex-shrink-0" />
 
         {/* My files */}
         <a
           href="/files"
-          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white px-2.5 py-1.5 rounded-md hover:bg-white/6 transition-all flex-shrink-0"
+          className="flex items-center gap-2 text-xs text-gray-400 hover:text-white px-3 py-2 rounded-lg hover:bg-white/[0.06] transition-all duration-200 flex-shrink-0"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -640,7 +769,7 @@ public class Main {
         {/* Share */}
         <button
           onClick={handleShareClick}
-          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white px-2.5 py-1.5 rounded-md hover:bg-white/6 transition-all flex-shrink-0"
+          className="flex items-center gap-2 text-xs text-gray-400 hover:text-white px-3 py-2 rounded-lg hover:bg-white/[0.06] transition-all duration-200 flex-shrink-0"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
