@@ -282,8 +282,8 @@ int main() {
           language,
           code: content,
           input,
-          timeLimit: 15000,
-          memoryLimit: 256,
+          timeLimit: 150000,
+          memoryLimit: 256000,
         }),
       });
       const data = await response.json();
