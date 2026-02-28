@@ -225,7 +225,7 @@ const Home = () => {
         <div className="max-w-5xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
           <StatCounter end={10000} suffix="+" label="Developers" />
           <StatCounter end={50000} suffix="+" label="Files Created" />
-          <StatCounter end={2} suffix=" langs" label="Python & Java" />
+          <StatCounter end={6} suffix=" langs" label="Python, Java, C, C++, JavaScript, and more" />
           <StatCounter end={99} suffix="%" label="Uptime" />
         </div>
       </div>
