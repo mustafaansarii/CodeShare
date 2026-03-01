@@ -1,6 +1,15 @@
 {
-    "builds": [{ "src": "package.json", "use": "@vercel/static-build" }],
+    "builds": [
+        {
+            "src": "package.json",
+            "use": "@vercel/static-build"
+        }
+    ],
     "rewrites": [
+        {
+            "source": "/careerhub/:path*",
+            "destination": "https://compiler-api-latest.onrender.com/:path*"
+        },
         {
             "source": "/(.*)",
             "destination": "/index.html"
