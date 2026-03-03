@@ -92,16 +92,36 @@ const Navbar = () => {
     <div className="fixed top-0 left-0 right-0 z-50 flex flex-col">
       {/* ── Announcement banner ── */}
       {banner && (
-        <div className="relative bg-gradient-to-r from-blue-600/90 to-indigo-600/90 backdrop-blur-sm text-white text-xs py-2 px-4 text-center">
-          <span className="font-medium">🚀 Real-time collaboration is live!</span>
-          <span className="ml-2 text-blue-100">Share edit access with teammates by email →</span>
-          <a href="/signup" className="ml-3 underline underline-offset-2 font-semibold hover:text-white/80 transition-colors">Try free</a>
+        <div className="hidden sm:flex relative items-center justify-center gap-3 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/[0.06] text-xs py-2 px-10 overflow-hidden">
+          {/* Gradient accent line at top */}
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/60 to-transparent" />
+          {/* Subtle background glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-indigo-600/8 to-purple-600/10 pointer-events-none" />
+
+          {/* Content */}
+          <span className="relative flex items-center gap-2 text-gray-300">
+            <span className="flex items-center gap-1.5 font-semibold text-white">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+              Real-time collaboration is live
+            </span>
+            <span className="text-gray-500">·</span>
+            <span className="text-gray-400">Share edit access with teammates by email</span>
+          </span>
+
+          <a
+            href="/signup"
+            className="relative flex items-center gap-1 bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/25 text-white font-semibold px-3 py-0.5 rounded-full transition-all duration-200 hover:-translate-y-px"
+          >
+            Try free
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+          </a>
+
           <button
             onClick={() => setBanner(false)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-300 transition-colors p-1.5 rounded-md hover:bg-white/5"
             aria-label="Dismiss"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
